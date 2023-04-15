@@ -1,0 +1,22 @@
+# The text adventure game api
+
+This is a fun example of an api to build your own text adventures, while at the same time teaching the Java module system.
+
+The maven project consists of 4 api modules and two implementations:
+* api: provides the interfaces and core classes that you need to build your own story
+* engine: runs the stories in a user interface (Swing or console), by acting as a service locator for modules that implement the Story api.
+* Then there are two projects that implement, each in a single java file packaged as a module.
+
+Later adventure stories can be added to the module path, to be picked up by the engine and presented as selectable.
+
+
+## Running the application
+To compile and package the modules into jars, each in their respective target folder, run:
+```bash
+mvn package
+```
+Ideally, all modules should go in a single module path, but you can specify multiple paths on the `-p` option.
+```bash
+java -p api/target/api.jar:engine/target/engine.jar:fellowship/target/fellowship.jar:secretkey/target/secretkey.jar --module adventure.engine/adventure.engine.Adventure
+# Alternatively, you can use adventure.engine/adventure.engine.AdventureSwing to run the graphical version
+```
