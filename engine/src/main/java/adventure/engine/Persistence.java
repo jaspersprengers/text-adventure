@@ -10,15 +10,15 @@ import java.util.Optional;
 
 public class Persistence {
 
-    public void saveGame(GameState game) {
+    public void saveGame(String storyName, GameState gameState) {
         //get path to user home dir
         var home = Paths.get(System.getProperty("user.home"));
-        var fileName = Paths.get("%s.ser".formatted(game.getStory().getName()));
+        var fileName = Paths.get("%s.ser".formatted(storyName));
         var file = home.resolve(fileName).toFile();
         try {
-            new ObjectOutputStream(new FileOutputStream(file)).writeObject(game);
+            new ObjectOutputStream(new FileOutputStream(file)).writeObject(gameState);
         } catch (IOException e) {
-            System.err.println("Could not save game");
+            System.err.println("Could not save game for file %s".formatted(file));
             e.printStackTrace();
         }
     }
@@ -31,8 +31,7 @@ public class Persistence {
             Object gameState = new ObjectInputStream(new FileInputStream(file)).readObject();
             return Optional.of((GameState) gameState);
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Could not load game");
-            e.printStackTrace();
+            System.err.println("Could not load game for file %s".formatted(file));
             return Optional.empty();
         }
     }

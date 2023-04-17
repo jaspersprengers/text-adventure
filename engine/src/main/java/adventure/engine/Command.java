@@ -19,10 +19,15 @@ public abstract class Command {
         String line = raw.toLowerCase().trim();
         if (line.startsWith("go")) {
             return new DirectionCommand(line);
-        } else if (line.equals("q")) {
+        }
+        else if (line.startsWith("see")) {
+            return new SeeCommand(line);
+        }
+        else if (line.equals("help")) {
+            return new HelpCommand();
+        }
+        else if (line.equals("quit")) {
             return new QuitCommand();
-        }  else if (line.startsWith("load")) {
-            return new LoadGameCommand(raw);
         }
         return new QueryCommand(line);
     }
@@ -32,32 +37,36 @@ public abstract class Command {
     }
 }
 
-class LoadGameCommand extends Command {
+class HelpCommand extends  Command {
 
-    public LoadGameCommand(String command) {
-        super(command.replace("load ", ""));
+    public HelpCommand() {
+        super("help");
     }
 
     @Override public void accept(Game game) {
-        game.load(getText());
+        game.print("Available commands:");
+        game.print("go <direction> to move to a different location. Access may be blocked.");
+        game.print("see <some object> to get more information about the object.");
+        game.print("quit to exit the game and resume later.");
+        game.print("help");
     }
 }
 
-class DirectionCommand extends Command {
+abstract class StandardCommand extends Command {
 
-    private final String direction;
-
-    public String getDirection() {
-        return direction;
+    public StandardCommand(String text) {
+        super(text.replaceFirst("^(\\w+) (.*?)$", "$2"));
     }
+}
+
+class DirectionCommand extends StandardCommand {
 
     public DirectionCommand(String command) {
         super(command);
-        this.direction = command.replace("go ", "");
     }
 
     public void accept(Game game) {
-        game.getCurrentLocation().getExitOpt(direction)
+        game.getCurrentLocation().getExitOpt(text)
                 .ifPresentOrElse(
                 exit -> {
                     if (exit.isLocked()) {
@@ -71,7 +80,22 @@ class DirectionCommand extends Command {
                 () -> game.print("Sorry, can't go there")
         );
     }
+}
 
+class SeeCommand extends Command {
+
+    public SeeCommand(String command) {
+        super(command);
+    }
+
+    @Override public void accept(Game game) {
+        game.getCurrentLocation().findAction(text).ifPresentOrElse(
+                action -> {
+                    action.accept(game);
+                },
+                () -> game.print(game.getCurrentLocation().toString())
+        );
+    }
 }
 
 

@@ -1,6 +1,6 @@
 package epics.secretkey;
 
-import adventure.api.ActionOption;
+import adventure.api.Action;
 import adventure.api.Exit;
 import adventure.api.Location;
 import adventure.api.Story;
@@ -36,12 +36,12 @@ public class SecretKey extends Story {
                             }
                         })));
 
-        hall.addActionable(ActionOption.inspectObject("table", "There is a cup placed upside down on the table."));
-        hall.addActionable(ActionOption.inspectObject("clock", "The time is ten minutes past midnight."));
-        hall.addActionable(ActionOption.inspectObject("mirror", "You're looking at a puzzled person."));
-        hall.addActionable("lift cup", g -> {
+        hall.addAction(Action.see("table", "There is a cup placed upside down on the table."));
+        hall.addAction(Action.see("clock", "The time is ten minutes past midnight."));
+        hall.addAction(Action.see("mirror", "You're looking at a puzzled person."));
+        hall.addAction("lift cup", g -> {
             g.print("There is a key under the cup");
-            g.getCurrentLocation().addActionable(ActionOption.takeObject("key"));
+            g.getCurrentLocation().addAction(Action.take("key"));
         });
 
         kitchen.addExit(Exit.to(hall));
@@ -49,10 +49,9 @@ public class SecretKey extends Story {
                 .lock("Sorry, the door is locked")
                 .onMove(g -> {
                     g.print("Congratulations! You won the game!");
-                    g.conclude();
                 }));
 
-        kitchen.addActionable("unlock door", game -> {
+        kitchen.addAction("unlock door", game -> {
             if (game.hasGoody("key")) {
                 game.print("The door is unlocked");
                 kitchen.getExit(bathroom).unlock();

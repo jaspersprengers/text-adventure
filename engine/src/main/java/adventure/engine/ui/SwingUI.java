@@ -31,7 +31,6 @@ public class SwingUI implements UserInterface {
                     String text = textField.getText();
                     if (onNext != null && text != null) {
                         textArea.setText("");
-                        textArea.append("You: "+text + "\n");
                         textField.setText("");
                         onNext.accept(text);
                     }
@@ -53,8 +52,8 @@ public class SwingUI implements UserInterface {
     }
 
 
-    @Override public void onNextLine(Consumer<String> onNext) {
-        this.onNext = onNext;
+    @Override public void onNextCommand(Consumer<String> commandString) {
+        this.onNext = commandString;
     }
 
     @Override public void printLine(String line) {

@@ -9,6 +9,7 @@ public abstract class Story implements Serializable {
     protected final String name;
 
     private final Set<Location> locations = new HashSet<>();
+
     public String getName() {
         return name;
     }
@@ -28,6 +29,11 @@ public abstract class Story implements Serializable {
     public Location getLocation(String id) {
         return locations.stream().filter(l -> l.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Location not found: " + id));
+    }
+
+    //parse string to valid filename
+    public String getFilename() {
+        return name.toLowerCase().replaceAll("\\W", "_");
     }
 
 }

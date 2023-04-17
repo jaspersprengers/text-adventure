@@ -20,3 +20,16 @@ Ideally, all modules should go in a single module path, but you can specify mult
 java -p api/target/api.jar:engine/target/engine.jar:fellowship/target/fellowship.jar:secretkey/target/secretkey.jar --module adventure.engine/adventure.engine.Adventure
 # Alternatively, you can use adventure.engine/adventure.engine.AdventureSwing to run the graphical version
 ```
+
+## Adding a new story
+To add a new story, you need to create a new module that implements the `adventure.api.Story` interface.
+The module should have a module-info.java file with a dependency on the api module.
+```java
+module cool.adventure {
+    requires adventure.api;
+    provides adventure.api.Story with coolgames.MyAdventure;
+}
+```
+It should also declare the `Story` implementation as a service provider, so that the engine can find it.
+```java
+

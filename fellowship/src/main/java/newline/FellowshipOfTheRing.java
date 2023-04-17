@@ -25,13 +25,12 @@ public class FellowshipOfTheRing extends Story {
             Congratulations for making it thus far!
             The story continues on disk two.'
             """);
-            g.conclude();
         }));
 
-        outside.addActionable("see wall", g -> {
+        outside.addAction("see wall", g -> {
             g.print("There's a text that reads: 'Speak friend, and enter'");
         });
-        outside.addActionable("say mellon", g -> {
+        outside.addAction("say mellon", g -> {
             g.print("The wall opens up to reveal an entrance to the mine");
             outside.getExit(mine).unlock();
         });

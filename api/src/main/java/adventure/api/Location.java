@@ -13,7 +13,7 @@ public class Location implements Serializable {
     private final String id;
     private final String description;
 
-    private final Set<ActionOption> actions;
+    private final Set<Action> actions;
     private final List<Exit> exits;
     public Location(String id, String description) {
         this.id = id;
@@ -22,12 +22,12 @@ public class Location implements Serializable {
         this.exits = new ArrayList<>();
     }
 
-    public void addActionable(ActionOption action) {
+    public void addAction(Action action) {
         this.actions.add(action);
     }
 
-    public void addActionable(String command, GameAction action ) {
-        this.actions.add(new ActionOption(command, action));
+    public void addAction(String command, GameAction action ) {
+        this.actions.add(new Action(command, action));
     }
 
     public void addExit(Exit exit) {
@@ -42,11 +42,7 @@ public class Location implements Serializable {
         return exits.stream().filter(mt -> mt.getName().equalsIgnoreCase(exit)).findFirst();
     }
 
-    public boolean canExit(String exit) {
-        return exits.stream().anyMatch(mt -> mt.getName().equalsIgnoreCase(exit));
-    }
-
-    public Optional<ActionOption> findAction(String command) {
+    public Optional<Action> findAction(String command) {
         return actions.stream()
                 .filter(a -> a.match(command))
                 .findFirst();
@@ -56,15 +52,12 @@ public class Location implements Serializable {
         return id;
     }
 
-    public String getDescription() {
-        return description;
-    }
     @Override
     public String toString(){
-        return """
-            %s
-            Exits: %s
-            """.formatted(description, exits.stream().map(Exit::getName).collect(Collectors.joining(", ")));
+        var exitStr = exits.isEmpty() ?
+                "" :
+                "\nExits: %s".formatted(exits.stream().map(Exit::getName).collect(Collectors.joining(", ")));
+        return "%s%s".formatted(description, exitStr);
 
     }
 

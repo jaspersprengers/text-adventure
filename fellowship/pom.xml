@@ -7,7 +7,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>fellowship</artifactId>
-    <name>Archetype - dracula</name>
+    <name>Fellowship of the Ring</name>
 
     <dependencies>
         <dependency>

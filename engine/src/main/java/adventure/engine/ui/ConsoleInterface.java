@@ -26,8 +26,8 @@ public class ConsoleInterface implements UserInterface {
         }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
-    @Override public void onNextLine(Consumer<String> onNext) {
-        this.onNext = onNext;
+    @Override public void onNextCommand(Consumer<String> commandString) {
+        this.onNext = commandString;
     }
 
     @Override public void printLine(String line) {

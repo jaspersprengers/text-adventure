@@ -6,6 +6,8 @@ import adventure.api.Location;
 import adventure.api.Story;
 import adventure.engine.ui.UserInterface;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,37 +15,40 @@ import java.util.function.Consumer;
 
 public class GameImpl implements Game {
 
-    private GameState gameState;
     private final StoryLoader storyLoader = new StoryLoader();
-    private final UserInterface ui;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
     private final Persistence persistence = new Persistence();
 
+    private final UserInterface ui;
+
+    private Location location;
+    private Story story;
+    private Set<String> goodies = new HashSet<>();
+
     public GameImpl(UserInterface ui) {
         this.ui = ui;
-        ui.onNextLine(this::onNext);
     }
 
     public void start() {
-        this.gameState = new GameState(storyLoader);
-        this.gameState.setCurrentLocation(storyLoader.getStartLocation());
-        print(storyLoader.getStartLocation().toString());
-    }
-
-    public void startStory(Story story){
-        this.gameState = new GameState(story);
-        if (gameState.getCurrentLocation() == null) {
-            this.gameState.setCurrentLocation(gameState.getStory().getStartLocation());
-        }
-        print(gameState.getCurrentLocation().toString());
+        print(storyLoader.getWelcomeText());
+        storyLoader.setCallback(ui, s -> {
+            this.story = s;
+            GameState gameState = persistence.loadGame(story.getFilename())
+                    .orElse(new GameState(story.getStartLocation().getId()));
+            this.goodies = gameState.goodies();
+            this.location = story.getLocation(gameState.currentLocation());
+            //registers a new callback on the UI, to be called when the user enters a command
+            ui.onNextCommand(this::onNext);
+            print(location.toString());//print the description of the start location to the UI
+        });
     }
 
     public Location getCurrentLocation() {
-        return gameState.getCurrentLocation();
+        return location;
     }
 
     public void setCurrentLocation(Location location) {
-        gameState.setCurrentLocation(location);
+        this.location = location;
     }
 
     private void onNext(String commandStr) {
@@ -54,22 +59,6 @@ public class GameImpl implements Game {
         ui.printLine(text);
     }
 
-    public void load(String storyName){
-        print("Loading game "+storyName);
-        persistence.loadGame(storyName).ifPresentOrElse(
-                gameState -> {
-                    this.gameState = gameState;
-                    print("Successfully loaded. Resuming from last save...");
-                    start();
-                },
-                () -> print("No saved game found for "+storyName)
-        );
-    }
-
-    public boolean isCurrentLocation(String locationId) {
-        return gameState.getCurrentLocation().getId().equals(locationId);
-    }
-
     public Game setTimeout(long timeInSeconds, Consumer<Game> action) {
         executor.schedule(() -> {
             action.accept(this);
@@ -77,20 +66,12 @@ public class GameImpl implements Game {
         return this;
     }
 
-    public void addGoodie(String goodie) {
-        gameState.getGoodies().add(goodie);
-    }
-
-    public boolean hasGoody(String goodie) {
-        return gameState.getGoodies().contains(goodie);
+    @Override public Set<String> getGoodies() {
+        return goodies;
     }
 
     public void quit() {
-        persistence.saveGame(gameState);
-        shutDown();
-    }
-
-    public void conclude() {
+        persistence.saveGame(story.getFilename(), new GameState(goodies, location.getId()));
         shutDown();
     }
 

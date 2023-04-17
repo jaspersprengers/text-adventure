@@ -1,10 +1,9 @@
 package adventure.api;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public interface Game {
-
-    void load(String text);
 
     void start();
 
@@ -16,15 +15,20 @@ public interface Game {
 
     Location getCurrentLocation();
 
-    void conclude();
-
     Game setTimeout(long timeInSeconds, Consumer<Game> action);
 
-    boolean isCurrentLocation(String locationId);
+    default boolean isCurrentLocation(String locationId){
+        return getCurrentLocation().getId().equals(locationId);
+    }
 
-    void addGoodie(String goodie);
+    Set<String> getGoodies();
 
-    boolean hasGoody(String goody);
+    default void addGoodie(String goodie){
+        getGoodies().add(goodie);
+    }
 
-    void startStory(Story loadStory);
+    default boolean hasGoody(String goody){
+        return getGoodies().contains(goody);
+    }
+
 }
