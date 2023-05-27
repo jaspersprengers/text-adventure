@@ -1,17 +1,13 @@
 package epics.secretkey;
 
+import adventure.api.AbstractStory;
 import adventure.api.Action;
 import adventure.api.Exit;
-import adventure.api.Location;
-import adventure.api.Story;
 
-public class SecretKey extends Story {
+public class SecretKey extends AbstractStory  {
 
     public SecretKey() {
         super("secret_key");
-    }
-
-    public Location getStartLocation() {
         var hall = addLocation("hall", """
                 You are in the hall. There is a door NORTH.
                 On the wall are a clock and a mirror.
@@ -59,6 +55,5 @@ public class SecretKey extends Story {
                 game.print("What with?");
             }
         });
-        return hall;
     }
 }

@@ -5,10 +5,19 @@ import java.util.function.Consumer;
 
 public interface Game {
 
+    /**
+     * Starts the game
+     */
     void start();
 
+    /**
+     * Prints a line of text to the interface
+     */
     void print(String s);
 
+    /**
+     * Quits the engine, persisting the current state to file.
+     */
     void quit();
 
     void setCurrentLocation(Location newLocation);
@@ -30,5 +39,7 @@ public interface Game {
     default boolean hasGoody(String goody){
         return getGoodies().contains(goody);
     }
+
+    boolean isShutDown();
 
 }

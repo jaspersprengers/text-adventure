@@ -2,6 +2,8 @@ package adventure.engine;
 
 import adventure.api.Game;
 
+import java.util.Set;
+
 public abstract class Command {
 
     protected String text;

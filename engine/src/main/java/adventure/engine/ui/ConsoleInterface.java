@@ -1,5 +1,7 @@
 package adventure.engine.ui;
 
+import adventure.api.UserInterface;
+
 import java.io.Console;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,6 +38,7 @@ public class ConsoleInterface implements UserInterface {
 
     @Override public void shutdown() {
         executor.shutdownNow();
+        System.exit(0);
     }
 
 }

@@ -44,7 +44,7 @@ public class Location implements Serializable {
 
     public Optional<Action> findAction(String command) {
         return actions.stream()
-                .filter(a -> a.match(command))
+                .filter(a -> a.matches(command))
                 .findFirst();
     }
 

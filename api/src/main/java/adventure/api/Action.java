@@ -13,7 +13,7 @@ public class Action extends AbstractAction implements Serializable {
         this.onAccept = onAccept;
     }
 
-    public boolean match(String input) {
+    public boolean matches(String input) {
         return this.text.equalsIgnoreCase(input);
     }
 

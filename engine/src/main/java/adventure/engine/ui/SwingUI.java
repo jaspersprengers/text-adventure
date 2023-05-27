@@ -1,8 +1,8 @@
 package adventure.engine.ui;
 
+import adventure.api.UserInterface;
+
 import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
@@ -62,5 +62,6 @@ public class SwingUI implements UserInterface {
 
     @Override public void shutdown() {
         frame.dispose();
+        System.exit(0);
     }
 }
