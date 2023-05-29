@@ -12,8 +12,8 @@ public interface StoryLoader {
         return getStories().stream().map(Story::getName).toList();
     }
 
-    default String getWelcomeText() {
-        StringBuilder sb = new StringBuilder("Select the number of the story you want to play:\n");
+    default String getStoriesFormatted() {
+        StringBuilder sb = new StringBuilder();
         getNames().forEach(name -> sb
                 .append(1 + getNames().indexOf(name))
                 .append("  : ")

@@ -16,9 +16,14 @@ public interface Game {
     void print(String s);
 
     /**
-     * Quits the engine, persisting the current state to file.
+     * Quits the engine mid-game, persisting the current state to file.
      */
-    void quit();
+    void saveAndQuit();
+
+    /**
+     * Called when the game has been completed, successfully or not
+     */
+    void gameCompleted();
 
     void setCurrentLocation(Location newLocation);
 

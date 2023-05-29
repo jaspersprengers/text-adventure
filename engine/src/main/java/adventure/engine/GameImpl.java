@@ -6,11 +6,9 @@ import adventure.api.Location;
 import adventure.api.Story;
 import adventure.api.UserInterface;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,13 +23,16 @@ public class GameImpl implements Game {
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
     private final Persistence persistence;
     private final UserInterface ui;
+    private final CommandFactory commandFactory = new CommandFactory();
 
     //game state
     private Locale locale;
-    private Location location;
+    private ResourceBundle rb;
+
     private Story story;
+    private Location location;
     private Set<String> goodies = new HashSet<>();
-    private MandatoryQuery mandatoryQuery;
+
 
     public GameImpl(UserInterface ui) {
         this(ui, new ServiceStoryLoader(), new FilePersistence());
@@ -48,24 +49,33 @@ public class GameImpl implements Game {
         print("Welcome/Bonvenon:");
         print("1: English");
         print("2: Esperanto");
-        newMandatoryQuery().addHandler("1", i -> {
+        commandFactory.newModalDialog().addHandler("1", () -> {
             onLocaleSelected(Locale.ENGLISH);
-        }).addHandler("2", i -> {
+        }).addHandler("2", () -> {
             onLocaleSelected(new Locale("eo"));
         });
     }
 
     private void onLocaleSelected(Locale locale) {
         this.locale = locale;
+        rb = ResourceBundle.getBundle("UI", locale);
+        commandFactory.setResourceBundle(rb);
         if (storyLoader.getNames().isEmpty()) {
-            print("No stories to choose from");
+            translate("engine_no_stories");
             shutDown();
             return;
         }
-        print(storyLoader.getWelcomeText());
-        newMandatoryQuery();
-        IntStream.rangeClosed(1, storyLoader.getStories().size()).forEach(i -> {
-            mandatoryQuery.addHandler(Integer.toString(i), input ->
+        selectStory();
+    }
+
+    private void selectStory() {
+        translate("engine_select_story");
+        print(storyLoader.getStoriesFormatted());
+        var dialog = commandFactory.newModalDialog();
+        var stories = storyLoader.getStories().stream().filter(s -> s.setLanguage(locale)).toList();
+
+        IntStream.rangeClosed(1, stories.size()).forEach(i -> {
+            dialog.addHandler(Integer.toString(i), () ->
                     onStorySelected(storyLoader.getStories().get(i - 1)));
         });
     }
@@ -79,10 +89,10 @@ public class GameImpl implements Game {
         var blankSlate = new GameState(story.getLocations().element().getId());
         persistence.loadGame(story.getFilename())
                 .ifPresentOrElse(gs -> {
-                    print("There is a saved game. Resume? (Y/N)");
-                    newMandatoryQuery()
-                            .addHandler("Y", i -> onGameStateLoaded(gs))
-                            .addHandler("N", i -> onGameStateLoaded(blankSlate));
+                    translate("engine_saved_game");
+                    commandFactory.newModalDialog()
+                            .addHandler(rb.getString("engine_yes"), () -> onGameStateLoaded(gs))
+                            .addHandler(rb.getString("engine_no"), () -> onGameStateLoaded(blankSlate));
                 }, () -> {
                     onGameStateLoaded(blankSlate);
                 });
@@ -104,13 +114,11 @@ public class GameImpl implements Game {
     }
 
     private void onNext(String commandStr) {
-        if (mandatoryQuery != null) {
-            if (mandatoryQuery.check(commandStr)) {
-                mandatoryQuery = null;
-            }
-        } else {
-            Command.parse(commandStr).accept(this);
-        }
+        commandFactory.fromString(commandStr).accept(commandStr, this);
+    }
+
+    private void translate(String resourceKey) {
+        print(rb.getString(resourceKey));
     }
 
     public void print(String text) {
@@ -128,7 +136,16 @@ public class GameImpl implements Game {
         return goodies;
     }
 
-    public void quit() {
+    public void gameCompleted() {
+        persistence.saveGame(story.getFilename(), null);
+        print("1: %s".formatted(rb.getString("engine_exit")));
+        print("2: %s".formatted(rb.getString("engine_play_another")));
+        commandFactory.newModalDialog()
+                .addHandler("1", this::shutDown)
+                .addHandler("2", this::selectStory);
+    }
+
+    public void saveAndQuit() {
         persistence.saveGame(story.getFilename(), new GameState(goodies, location.getId()));
         shutDown();
     }
@@ -140,33 +157,6 @@ public class GameImpl implements Game {
 
     public boolean isShutDown() {
         return executor.isShutdown();
-    }
-
-    MandatoryQuery newMandatoryQuery() {
-        mandatoryQuery = new MandatoryQuery();
-        return mandatoryQuery;
-    }
-
-    class MandatoryQuery {
-
-        private final Map<String, Consumer<String>> handlers = new HashMap<>();
-
-        boolean check(String input) {
-            return Optional.ofNullable(handlers.get(input.toLowerCase())).map(consumer -> {
-                consumer.accept(input);
-                return false;
-            }).orElseGet(() -> {
-                print("Invalid option!");
-                return true;
-            });
-        }
-
-        MandatoryQuery addHandler(String key, Consumer<String> handler) {
-            handlers.put(key.toLowerCase(), handler);
-            return this;
-        }
-
-
     }
 
 

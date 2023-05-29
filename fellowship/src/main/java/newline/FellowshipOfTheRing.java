@@ -4,10 +4,17 @@ import adventure.api.AbstractStory;
 import adventure.api.Exit;
 import adventure.api.Story;
 
+import java.util.Locale;
+import java.util.Set;
+
 public class FellowshipOfTheRing extends AbstractStory implements Story {
 
     public FellowshipOfTheRing() {
-        super("Fellowship of the Ring");
+        super("Fellowship of the Ring", Set.of(Locale.ENGLISH));
+    }
+
+    protected void setup() {
+
         var outside = addLocation("hall", """
                 You are standing in front of a great wall of rock.
                 Behind you is a shallow pool of water.
@@ -22,6 +29,7 @@ public class FellowshipOfTheRing extends AbstractStory implements Story {
                     Congratulations for making it thus far!
                     The story continues on disk two.'
                     """);
+            g.gameCompleted();
         }));
 
         outside.addAction("see wall", g -> {

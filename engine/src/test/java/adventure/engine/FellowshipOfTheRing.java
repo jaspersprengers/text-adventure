@@ -2,13 +2,17 @@ package adventure.engine;
 
 import adventure.api.AbstractStory;
 import adventure.api.Exit;
-import adventure.api.Location;
-import adventure.api.Story;
+
+import java.util.Locale;
+import java.util.Set;
 
 public class FellowshipOfTheRing extends AbstractStory {
 
     public FellowshipOfTheRing() {
-        super("Fellowship of the Ring");
+        super("Fellowship of the Ring", Set.of(Locale.ENGLISH));
+    }
+
+    protected void setup() {
         var outside = addLocation("hall", """
                 You are standing in front of the mine entrance.
                 Behind you is a shallow pool of water.
@@ -23,7 +27,7 @@ public class FellowshipOfTheRing extends AbstractStory {
                     Congratulations for making it thus far!
                     The story continues on disk two.'
                     """);
-            g.quit();
+            g.gameCompleted();
         }));
 
         outside.addAction("see wall", g -> {
@@ -33,6 +37,5 @@ public class FellowshipOfTheRing extends AbstractStory {
             g.print("The wall opens up to reveal an entrance to the mineOfMoria");
             outside.getExit(mineOfMoria).unlock();
         });
-
     }
 }

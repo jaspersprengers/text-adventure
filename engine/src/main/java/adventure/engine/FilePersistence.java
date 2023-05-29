@@ -5,20 +5,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class FilePersistence implements Persistence{
+public class FilePersistence implements Persistence {
 
     public void saveGame(String storyName, GameState gameState) {
         //get path to user home dir
         var home = Paths.get(System.getProperty("user.home"));
         var fileName = Paths.get("%s.ser".formatted(storyName));
-        var file = home.resolve(fileName).toFile();
+        var path = home.resolve(fileName);
         try {
-            new ObjectOutputStream(new FileOutputStream(file)).writeObject(gameState);
+            if (gameState == null)
+                Files.deleteIfExists(path);
+            else
+                new ObjectOutputStream(new FileOutputStream(path.toFile())).writeObject(gameState);
         } catch (IOException e) {
-            System.err.println("Could not save game for file %s".formatted(file));
+            System.err.printf("Could not save game for file %s", path);
             e.printStackTrace();
         }
     }
@@ -31,7 +35,7 @@ public class FilePersistence implements Persistence{
             Object gameState = new ObjectInputStream(new FileInputStream(file)).readObject();
             return Optional.of((GameState) gameState);
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Could not load game for file %s".formatted(file));
+            System.err.printf("Could not load game for file %s", file);
             return Optional.empty();
         }
     }

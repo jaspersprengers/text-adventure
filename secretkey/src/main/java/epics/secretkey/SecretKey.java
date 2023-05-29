@@ -4,10 +4,16 @@ import adventure.api.AbstractStory;
 import adventure.api.Action;
 import adventure.api.Exit;
 
-public class SecretKey extends AbstractStory  {
+import java.util.Locale;
+import java.util.Set;
+
+public class SecretKey extends AbstractStory {
 
     public SecretKey() {
-        super("secret_key");
+        super("secret_key", Set.of(Locale.ENGLISH));
+    }
+
+    protected void setup() {
         var hall = addLocation("hall", """
                 You are in the hall. There is a door NORTH.
                 On the wall are a clock and a mirror.
@@ -28,7 +34,7 @@ public class SecretKey extends AbstractStory  {
                         .setTimeout(15, g2 -> {
                             if (g2.isCurrentLocation("kitchen")) {
                                 g.print("The dog has killed you. Game over.");
-                                g.quit();
+                                g.gameCompleted();
                             }
                         })));
 
@@ -45,6 +51,7 @@ public class SecretKey extends AbstractStory  {
                 .lock("Sorry, the door is locked")
                 .onMove(g -> {
                     g.print("Congratulations! You won the game!");
+                    g.gameCompleted();
                 }));
 
         kitchen.addAction("unlock door", game -> {

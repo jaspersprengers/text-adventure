@@ -1,11 +1,18 @@
 package adventure.api;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Queue;
 
 public interface Story extends Serializable {
 
     String getName();
+
+    /**
+     * Attempts to set the Locale for the game
+     * @return true if the game supports this Locale, false otherwise
+     */
+    boolean setLanguage(Locale loc);
 
     Queue<Location> getLocations();
 
